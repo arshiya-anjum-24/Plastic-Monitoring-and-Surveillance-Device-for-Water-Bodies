@@ -63,7 +63,7 @@ This project was developed collaboratively as part of our academic coursework.
 - **Mouli** – [@velagamouli18](https://github.com/)  
 - **Chaitanya** – [@chaitanyasai11111](https://github.com/chaitanyasai11111)  
 - **Sameera** – [@sameeramanne](https://github.com/sameeramanne)  
-- **Adithi** – [@github-username](https://github.com/)  
+- **Adithi** – [@adithichiripal](https://github.com/adithichiripal)  
 - **Pranith** – [@github-username](https://github.com/)  
 
 ---
