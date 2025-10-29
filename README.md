@@ -69,7 +69,7 @@ This project was developed collaboratively as part of our academic coursework.
 ---
 
 ### Results  
-- Achieved **98% classification accuracy** on the plastic detection dataset.  
+- Achieved **95% classification accuracy** on the plastic detection dataset.  
 - Successfully demonstrated **live detection, GPS logging, and heatmap visualization** using the prototype.  
 - Real-time monitoring through a **web interface** showing both live and processed feeds.  
 
