@@ -61,10 +61,10 @@ This project was developed collaboratively as part of our academic coursework.
 
 - **Arshiya Anjum Shaik** – [@arshiya-anjum-24](https://github.com/arshiya-anjum-24)  
 - **Mouli** – [@github-username](https://github.com/)  
-- **Member 3** – [@github-username](https://github.com/)  
-- **Member 4** – [@github-username](https://github.com/)  
-- **Member 5** – [@github-username](https://github.com/)  
-- **Member 6** – [@github-username](https://github.com/)  
+- **Chaitanya** – [@github-username](https://github.com/)  
+- **Sameera** – [@github-username](https://github.com/)  
+- **Adithi** – [@github-username](https://github.com/)  
+- **Pranith** – [@github-username](https://github.com/)  
 
 ---
 
