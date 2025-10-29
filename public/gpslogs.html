@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>GPS Logs - Plastic Detection Boat</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="style.css">
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    /* ... (CSS Styles omitted for brevity) ... */
+    .heat-legend {
+      background: rgba(255,255,255,0.95);
+      padding: 8px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      font-size: 12px;
+      line-height: 1;
+    }
+    .heat-legend .legend-bar {
+      height: 10px;
+      width: 140px;
+      border-radius: 6px;
+      background: linear-gradient(90deg,
+        rgba(255,220,220,0.0) 0%,
+        rgba(255,190,190,0.6) 30%,
+        rgba(255,120,120,0.75) 65%,
+        rgba(200,40,40,0.95) 100%);
+      margin: 8px 0;
+    }
+    .heat-legend .labels { display:flex; justify-content:space-between; color:#374151; font-size:11px; }
+    #map { min-height: 500px; }
+  </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+  <header class="site-header">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+      <h1 class="text-xl font-bold tracking-wide">Plastic Detection Boat</h1>
+      <nav class="nav-links space-x-6 font-medium">
+        <a href="index.html">Home</a>
+        <a href="gpslogs.html" class="active">GPS Logs</a>
+        <a href="education.html">Our Mission</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="flex-grow container mx-auto p-6">
+    <h2 class="text-2xl font-semibold mb-6">📍 GPS Logs & Hotspots</h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+      <div class="overflow-hidden border rounded-lg shadow-md bg-white">
+        <div class="px-6 py-4 border-b bg-gray-50">
+          <h3 class="font-semibold text-lg">Detected Hotspots</h3>
+          <p class="text-sm text-gray-600">Real-time plastic detection logs.</p>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-sm text-left text-gray-700">
+            <thead class="bg-blue-600 text-white">
+              <tr>
+                <th class="px-4 py-3">Latitude</th>
+                <th class="px-4 py-3">Longitude</th>
+                <th class="px-4 py-3">Confidence</th>
+                <th class="px-4 py-3">Timestamp</th>
+              </tr>
+            </thead>
+            <tbody id="logsTableBody">
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="relative">
+        <div id="map" class="rounded-lg shadow-md border border-gray-300"></div>
+      </div>
+
+    </div>
+  </main>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.heat/0.2.0/leaflet-heat.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+
+  <script>
+    const tbody = document.getElementById('logsTableBody');
+    let allHeatPoints = [];
+    let heatLayer;
+
+    // Create map instance centered on a general area
+    const map = L.map('map', { zoomControl: true, attributionControl: true }).setView([16.507, 80.640], 15);
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap & CartoDB'
+    }).addTo(map);
+
+    function drawHeat(points) {
+      if (heatLayer) map.removeLayer(heatLayer);
+
+      heatLayer = L.heatLayer(points, {
+        radius: 36,
+        blur: 24,
+        maxZoom: 18,
+        gradient: {
+          0.2: 'rgba(255,200,200,0.6)',
+          0.5: 'rgba(255,120,120,0.75)',
+          0.8: 'rgba(220,60,60,0.9)',
+          1.0: 'rgba(180,20,20,1)'
+        }
+      }).addTo(map);
+
+      if (points.length > 0) {
+        try {
+          const latlngs = points.map(p => [p[0], p[1]]);
+          const bounds = L.latLngBounds(latlngs);
+          map.fitBounds(bounds.pad(0.25));
+        } catch (e) {
+            console.warn("Could not fit bounds. Defaulting to center.", e);
+        }
+      }
+    }
+
+// --- Function to Add a Log Row to the Table (FIXED) ---
+    function addLogToTable(log) {
+        // Basic validation of the log data
+        if (!log || typeof log.lat !== 'number' || typeof log.lon !== 'number') {
+            console.warn("Skipping invalid log data in addLogToTable:", log);
+            return; // Don't add invalid rows
+        }
+
+        const row = tbody.insertRow(0); // Insert new row at the top (index 0)
+        row.classList.add('border-b'); // Add bottom border to all rows
+
+        // --- THIS IS THE FIX ---
+        // Add alternating background color based on row index (after insertion)
+        // Only add the class if the condition is TRUE
+        if (tbody.rows.length % 2 === 0) { // Even indexed rows (0, 2, 4...) after insertion get bg
+             row.classList.add('bg-gray-50');
+        }
+        // --- END OF FIX ---
+
+        // Populate cells with data, using toFixed for consistent formatting
+        row.insertCell(0).className = 'px-4 py-3 whitespace-nowrap';
+        row.cells[0].textContent = log.lat.toFixed(5);
+
+        row.insertCell(1).className = 'px-4 py-3 whitespace-nowrap';
+        row.cells[1].textContent = log.lon.toFixed(5);
+
+        row.insertCell(2).className = 'px-4 py-3 whitespace-nowrap';
+        // Use a default confidence (e.g., 0.5) if missing, ensure it's a number
+        const confidence = (typeof log.confidence === 'number' && !isNaN(log.confidence)) ? log.confidence : 0.5;
+        row.cells[2].textContent = confidence.toFixed(2);
+
+        row.insertCell(3).className = 'px-4 py-3 whitespace-nowrap';
+        // Safely format the timestamp, provide fallback
+        try {
+            // Use Indian locale (en-IN) for time format
+            row.cells[3].textContent = log.timestamp ? new Date(log.timestamp).toLocaleTimeString('en-IN', { hour: '2-digit', minute:'2-digit', second:'2-digit' }) : 'N/A';
+        } catch (e) {
+            row.cells[3].textContent = 'Invalid Time'; // Fallback for bad timestamp string
+        }
+
+        // --- Limit the number of rows in the table ---
+        const MAX_TABLE_ROWS = 30; // Keep the latest 30 logs visible
+        while (tbody.rows.length > MAX_TABLE_ROWS) {
+             // Delete the oldest row (which is the last row in the table body)
+             tbody.deleteRow(MAX_TABLE_ROWS); // Index is MAX_TABLE_ROWS because it's 0-based
+        }
+    }
+
+    // CRITICAL FUNCTION: Reloads ALL data from the database on page load
+    async function loadInitialLogs() {
+      try {
+        const response = await fetch('/logs');
+        const logs = await response.json();
+        
+        tbody.innerHTML = '';
+        allHeatPoints = [];
+        
+        // Process logs from oldest to newest to ensure correct stacking in array
+        // (Though the backend sorts newest first, iterating backwards ensures table order)
+        for (let i = logs.length - 1; i >= 0; i--) {
+            addLogToTable(logs[i]); 
+            allHeatPoints.push([logs[i].lat, logs[i].lon, logs[i].confidence || 0.6]);
+        }
+        
+        // Redraw the map with all historical data
+        drawHeat(allHeatPoints);
+      } catch (e) {
+        console.error("Failed to load initial logs:", e);
+      }
+    }
+
+    // Initialize Map and Load Data immediately when the page loads
+    loadInitialLogs(); 
+
+    // Legend Control (omitted for brevity)
+    const legend = L.control({ position: 'bottomright' });
+    legend.onAdd = function () {
+      const div = L.DomUtil.create('div', 'heat-legend');
+      div.innerHTML = `<div style="font-weight:600; color:#111827;">Hotspot intensity</div>
+                       <div class="legend-bar"></div>
+                       <div class="labels"><span>Low</span><span>High</span></div>`;
+      return div;
+    };
+    legend.addTo(map);
+
+    // --- REAL-TIME SOCKET.IO LISTENER ---
+    const socket = io();
+    socket.on('new_detection', (log) => {
+        // Log received successfully from Node.js in real-time
+
+        // Add the new log to the table (at position 0)
+        addLogToTable(log);
+        
+        // Add the new log to the heatmap array
+        allHeatPoints.push([log.lat, log.lon, log.confidence || 0.6]);
+        
+        // Redraw the map with the new point added
+        drawHeat(allHeatPoints);
+    });
+  </script>
+
+</body>
+</html>

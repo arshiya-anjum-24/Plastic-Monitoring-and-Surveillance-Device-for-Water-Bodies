@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Boat Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <!-- Navbar -->
+  <header class="site-header">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+      <h1 class="text-xl font-bold tracking-wide">Plastic Detection Boat</h1>
+      <nav class="nav-links space-x-6 font-medium">
+        <a href="index.html">Home</a>
+        <a href="gpslogs.html">GPS Logs</a>
+        <a href="education.html">Our Mission</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Status -->
+  <main class="container">
+    <div class="text-center">
+      <p id="status" class="text-lg font-semibold">Boat idle</p>
+    </div>
+
+    <!-- D-pad -->
+    <div class="flex flex-col items-center space-y-6 mt-10">
+      <div class="grid grid-cols-3 gap-6 text-center">
+        <div></div>
+        <button onclick="sendCmd('forward')" class="arrow-btn">⬆️</button>
+        <div></div>
+
+        <button onclick="sendCmd('left')" class="arrow-btn">⬅️</button>
+        <button id="startStopBtn" onclick="toggleStartStop()" 
+                class="px-6 py-4 rounded-lg bg-green-600 text-white font-bold">
+          Start
+        </button>
+        <button onclick="sendCmd('right')" class="arrow-btn">➡️</button>
+
+        <div></div>
+        <button onclick="sendCmd('backward')" class="arrow-btn">⬇️</button>
+        <div></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="max-w-6xl mx-auto px-6 py-10 grid grid-cols-1 md:grid-cols-3 gap-8">
+      
+      <!-- About Us -->
+      <div>
+        <h3 class="footer-title">About Us</h3>
+        <p class="footer-text">
+          We are a research-driven team building an AI-powered boat that
+          <span class="font-semibold">detects plastic waste</span> in rivers and lakes.
+          Our goal is to provide real-time insights into pollution hotspots 
+          using robotics, IoT, and machine learning.
+        </p>
+      </div>
+
+      <!-- Quick Links -->
+      <div>
+        <h3 class="footer-title">Quick Links</h3>
+        <ul class="space-y-2 text-sm">
+          <li><a href="index.html">🏠 Home</a></li>
+          <li><a href="gpslogs.html">📍 GPS Logs</a></li>
+          <li><a href="education.html">Our Mission</a></li>
+        </ul>
+      </div>
+
+      <!-- Contact -->
+      <div>
+        <h3 class="footer-title">Contact</h3>
+        <p class="footer-text">📧 Email: 
+          <a href="mailto:plastic.boat.team@example.com">plastic.boat.team@example.com</a>
+        </p>
+        <p class="footer-text">🌐 Website: 
+          <a href="#">www.plasticdetectionboat.org</a>
+        </p>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      © 2025 Plastic Detection Boat Project — All rights reserved.
+    </div>
+  </footer>
+</body>
+</html>
